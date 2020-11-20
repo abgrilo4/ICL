@@ -1,0 +1,154 @@
+PARSER_BEGIN(Parser)
+
+import java.util.*;
+
+/** ID lister. */
+public class Parser {
+
+  /** Main entry point. */
+  public static void main(String args[]) {
+    Parser parser = new Parser(System.in);
+    ASTNode exp;
+    List<String> list;
+    boolean compilerMode = false;
+    if(args.length == 1)
+    	compilerMode = (args[0].equals("-c"));
+    CodeBlock c = new CodeBlock();
+    Environment env = new Environment(null);
+    CompilerEnvironment cEnv = new CompilerEnvironment(null);
+    
+    while (true) {
+    try {
+    exp = parser.Start();
+    env = new Environment(null);
+    if(compilerMode) {
+      Compiler comp = new Compiler(exp);
+      comp.compile();
+      exp.compile(c, cEnv);
+	  c.createFrame();
+	  System.exit(0);
+    }
+    else
+    	System.out.println( exp.eval(env) );
+    } catch (Exception e) {
+      System.out.println ("Syntax Error!");
+      parser.ReInit(System.in);
+    }
+    }
+  }
+
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+}
+
+TOKEN :
+{
+  < DEF: "def">
+  |
+  < EQUALS: "=">
+  |
+  < IN: "in">
+  |
+  < END: "end">
+  |
+  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  |
+  < Num: (["0"-"9"]) + >
+  |
+  < PLUS : "+" >
+  |
+  < MINUS : "-">
+  |
+  < TIMES : "*">
+  |
+  < DIV : "/">
+  |
+  < LPAR : "(" >
+  |
+  < RPAR : ")" >
+  |
+  < EL: "\n" >
+}
+
+ASTNode Start():
+{ ASTNode t; }
+{
+   t = Exp() <EL>
+   { return t; }
+}
+
+ASTNode Exp() :
+{ Token op;
+  ASTNode t1, t2; }
+{
+     t1=Term() ( ( op=<PLUS> | op=<MINUS> ) t2=Term() 
+                 { if (op.kind == PLUS) 
+                         t1 = new ASTPlus(t1,t2);
+                   else  t1 = new ASTMinus(t1,t2);
+                 } 
+               ) *
+     { return t1; } 
+}
+
+ASTNode Term() :
+{Token op;
+  ASTNode t1, t2;}
+{
+     t1 = Fact() ( ( op=<TIMES> | op=<DIV> ) 
+     
+     t2 = Term() 
+ 	 {
+        if(op.kind == TIMES)
+        	t1 = new ASTMul(t1, t2);
+        if(op.kind == DIV)
+        	t1 = new ASTDiv(t1, t2);    
+                
+     } 
+		) *
+     { return t1; } 
+}
+
+
+ASTNode Fact() :
+{ Token n; 
+  Token id;
+  List<PairValues> list = new LinkedList();
+  Map<String, ASTNode> mapAux = new LinkedHashMap<String, ASTNode>();
+  
+  ASTNode t, a, b;}
+{
+   ( n=<Num> { t = new ASTNum(Integer.parseInt(n.image)); } 
+   | <LPAR> t=Exp() <RPAR> 
+   | id = <Id> {t = new ASTId(id.image);}
+   |<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));} (<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));})* <IN> b = Exp()<END> { t = new ASTDef(list, b, mapAux);}
+   )
+   { return t; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
