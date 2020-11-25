@@ -71,6 +71,7 @@ public class Compiler {
 		out.println("astore 4");
 		out.println(code.dump());
 		code.dump();
+		code.dumpFrames();
 	}
 	
 	

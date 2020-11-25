@@ -1,3 +1,6 @@
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -82,6 +85,13 @@ public class CodeBlock {
 			for(String s: bytecodes)
 				res += ("       "+s+"\n");
 			return res;
+		}
+		
+		void dumpFrames() throws FileNotFoundException { 
+			for( StackFrame frame: frames) {
+				PrintStream out = new PrintStream(new FileOutputStream("frame" + frame.getId()+".j"));
+				frame.dump(out);
+			}
 		}
 		
 }
