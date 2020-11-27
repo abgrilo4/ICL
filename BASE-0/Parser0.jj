@@ -58,6 +58,8 @@ TOKEN :
   |
   < END: "end">
   |
+  < SEMI: ";">
+  |
   < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
   |
   < Num: (["0"-"9"]) + >
@@ -127,7 +129,7 @@ ASTNode Fact() :
    ( n=<Num> { t = new ASTNum(Integer.parseInt(n.image)); } 
    | <LPAR> t=Exp() <RPAR> 
    | id = <Id> {t = new ASTId(id.image);}
-   |<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));} (<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));})* <IN> b = Exp()<END> { t = new ASTDef(list, b, mapAux);}
+   |<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));} (<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));})* <IN> b = Exp()<END> <SEMI> { t = new ASTDef(list, b, mapAux);}
    )
    { return t; }
 }
