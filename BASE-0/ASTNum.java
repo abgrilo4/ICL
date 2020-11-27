@@ -11,7 +11,7 @@ public class ASTNum implements ASTNode {
 	
 	public void compile(CodeBlock c, CompilerEnvironment env)	
 	{	
-		c.emit("sipush" + val);
+		c.emit("sipush " + val);
 	}
 
 }

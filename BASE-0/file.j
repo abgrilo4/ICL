@@ -32,7 +32,7 @@ astore 4
        putfield frame0/sl Ljava/lang/Object;
        astore 4
        aload 4
-       sipush1
+       sipush 4
        putfield frame0/x0 I
        new frame1
        dup
@@ -42,14 +42,31 @@ astore 4
        putfield frame1/sl Lframe0;
        astore 4
        aload 4
-       sipush2
+       sipush 5
        putfield frame1/x0 I
+       new frame2
+       dup
+       invokespecial frame2/<init>()V
+       dup
        aload 4
-       getfield frame1/x0 I
+       putfield frame2/sl Lframe1;
+       astore 4
        aload 4
+       sipush 8
+       putfield frame2/x0 I
+       aload 4
+       getfield frame2/sl Lframe1;
        getfield frame1/sl Lframe0;
        getfield frame0/x0 I
+       aload 4
+       getfield frame2/sl Lframe1;
+       getfield frame1/x0 I
+       sipush 8
+       imul
        iadd
+       aload 4
+       getfield frame2/sl Lframe1;
+       astore 4
        aload 4
        getfield frame1/sl Lframe0;
        astore 4
