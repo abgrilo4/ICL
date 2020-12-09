@@ -1,3 +1,5 @@
+package Compiler;
+
 import java.io.PrintStream;
 
 public class StackFrame {

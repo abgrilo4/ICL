@@ -1,3 +1,5 @@
+package Compiler;
+
 public class Coordinates {
 
 		private int level;

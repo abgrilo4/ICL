@@ -1,3 +1,8 @@
+package AST;
+
+import Environment.Environment;
+import Compiler.CompilerEnvironment;
+import Compiler.CodeBlock;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;

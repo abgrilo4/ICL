@@ -1,3 +1,9 @@
+package AST;
+
+import Environment.Environment;
+import Compiler.CompilerEnvironment;
+import Compiler.CodeBlock;
+
 public class ASTDiv implements ASTNode{
 	
 	

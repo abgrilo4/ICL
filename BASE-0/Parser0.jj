@@ -1,6 +1,10 @@
 PARSER_BEGIN(Parser)
 
 import java.util.*;
+import Environment.*;
+import Compiler.*;
+import Compiler.Compiler;
+import AST.*;
 
 /** ID lister. */
 public class Parser {

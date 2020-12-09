@@ -1,3 +1,5 @@
+package AST;
+
 public class PairValues {
 	
 	private String key;

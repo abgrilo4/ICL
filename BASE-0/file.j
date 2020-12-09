@@ -42,7 +42,7 @@ astore 4
        putfield frame1/sl Lframe0;
        astore 4
        aload 4
-       sipush 3
+       sipush 2
        putfield frame1/x0 I
        new frame2
        dup
@@ -52,7 +52,14 @@ astore 4
        putfield frame2/sl Lframe1;
        astore 4
        aload 4
-       sipush 5
+       aload 4
+       getfield frame2/sl Lframe1;
+       getfield frame1/sl Lframe0;
+       getfield frame0/x0 I
+       aload 4
+       getfield frame2/sl Lframe1;
+       getfield frame1/x0 I
+       iadd
        putfield frame2/x0 I
        aload 4
        getfield frame2/sl Lframe1;

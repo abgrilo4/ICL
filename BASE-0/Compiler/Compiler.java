@@ -1,6 +1,10 @@
+package Compiler;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+
+import AST.ASTNode;
 
 public class Compiler {
 	

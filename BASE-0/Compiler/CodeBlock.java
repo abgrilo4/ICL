@@ -1,9 +1,13 @@
+package Compiler;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import AST.ASTNode;
 
 public class CodeBlock {
 

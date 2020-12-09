@@ -1,3 +1,10 @@
+package AST;
+
+import Environment.Environment;
+import Compiler.CompilerEnvironment;
+import Compiler.Coordinates;
+import Compiler.CodeBlock;
+
 public class ASTId implements ASTNode{
 
 	private String id;
