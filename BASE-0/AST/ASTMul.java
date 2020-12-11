@@ -1,23 +1,37 @@
 package AST;
 
 import Environment.Environment;
+import Exceptions.WrongTypeException;
+import Types.IType;
+import Types.IntegerType;
+import Values.IValue;
+import Values.IntegerValue;
 import Compiler.CompilerEnvironment;
 import Compiler.CodeBlock;
 
 public class ASTMul implements ASTNode{
 	ASTNode lhs, rhs;
-
-	public int eval(Environment	e)
-	{ 
-		int v1 = lhs.eval(e);
-		int v2 = rhs.eval(e);
-		return v1*v2; 
-	}
-
+	private IType type;
+	private static final String ERROR_EVAL = "Illegal arguments to - operator";
+	private static final String ERROR_TYPECHECK = "Wrong types in *";
+	
 	public ASTMul(ASTNode l, ASTNode r)
 	{
 		lhs = l; rhs = r;
 	}
+	
+	public IValue eval(Environment<IValue>	e) throws WrongTypeException
+	{ 
+		IValue v1 = lhs.eval(e);
+		IValue v2 = rhs.eval(e);
+		if(v1 instanceof IntegerValue) {
+			if(v2 instanceof IntegerValue) {
+				return new IntegerValue(((IntegerValue)v1).getIntegerValue()*((IntegerValue)v2).getIntegerValue());	
+			}
+		}
+		throw new WrongTypeException(ERROR_EVAL);
+	}
+
 	
 	public void compile(CodeBlock c, CompilerEnvironment env)	
 	{	
@@ -25,4 +39,20 @@ public class ASTMul implements ASTNode{
 		rhs.compile(c,	env);	
 		c.emit("imul");
 	}
+
+	@Override
+	public IType typechecker(Environment<IType> environment) throws WrongTypeException {
+		IType l = lhs.typechecker(environment);
+		IType r = rhs.typechecker(environment);
+		
+		if(l.equals(IntegerType.singleton) && r.equals(IntegerType.singleton))
+		{
+			type = l;
+			return type;
+		}
+		
+		throw new WrongTypeException(ERROR_TYPECHECK);
+	}
+	
+	
 }

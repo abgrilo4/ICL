@@ -1,6 +1,9 @@
 package AST;
 
 import Environment.Environment;
+import Exceptions.WrongTypeException;
+import Types.IType;
+import Values.IValue;
 import Compiler.CompilerEnvironment;
 import Compiler.Coordinates;
 import Compiler.CodeBlock;
@@ -8,8 +11,9 @@ import Compiler.CodeBlock;
 public class ASTId implements ASTNode{
 
 	private String id;
+	private IType type;
 	
-	public int eval(Environment e) 
+	public IValue eval(Environment<IValue> e) 
 	{
 		return e.find(id);
 	}
@@ -24,5 +28,13 @@ public class ASTId implements ASTNode{
 		Coordinates coord = env.find(id, 0);
 		c.compileId(coord);
 	}
+
+	@Override
+	public IType typechecker(Environment<IType> environment) throws WrongTypeException {
+		type = environment.find(id);
+		return type;
+	}
+	
+	
 
 }

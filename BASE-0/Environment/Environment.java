@@ -3,35 +3,35 @@ package Environment;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Environment{
-	private Environment parent;
-	private Map<String, Integer> map;
+public class Environment<T>{
+	private Environment<T> parent;
+	private Map<String, T> map;
 	
-	public Environment(Environment parent)
+	public Environment(Environment<T> parent)
 	{
 		this.parent = parent;
-		map = new HashMap<String, Integer>();
+		map = new HashMap<String, T>();
 	}
 	
 	
-	public Environment beginScope() 
+	public Environment<T> beginScope() 
 	{
-		Environment environment = new Environment(this);
+		Environment<T> environment = new Environment<T>(this);
 		return environment;
 	}
 
-	public Environment endScope() 
+	public Environment<T> endScope() 
 	{
 		return parent;
 	}
 
-	public void assoc(String id, int value) 
+	public void assoc(String id, T value) 
 	{
 		map.put(id, value);
 		
 	}
 
-	public int find(String id) 
+	public T find(String id) 
 	{
 		if(map.containsKey(id))
 			return map.get(id);
