@@ -25,6 +25,8 @@
 aconst_null
 astore 4
        sipush 1
+       sipush 1
+       iadd
 
        ; END
 

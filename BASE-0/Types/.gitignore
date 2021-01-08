@@ -2,3 +2,5 @@
 /BooleanType.class
 /IntegerType.class
 /DefType.class
+/RefType.class
+/StringValue.class

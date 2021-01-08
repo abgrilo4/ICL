@@ -5,6 +5,7 @@ import Environment.*;
 import Compiler.*;
 import Compiler.Compiler;
 import AST.*;
+import Values.*;
 
 /** ID lister. */
 public class Parser {
@@ -18,7 +19,7 @@ public class Parser {
     if(args.length == 1)
     	compilerMode = (args[0].equals("-c"));
     CodeBlock c = new CodeBlock();
-    Environment env = new Environment(null);
+    Environment<IValue> env = new Environment<IValue>(null);
     CompilerEnvironment cEnv = new CompilerEnvironment(null);
     
     while (true) {
@@ -33,7 +34,7 @@ public class Parser {
 	  System.exit(0);
     }
     else
-    	System.out.println( exp.eval(env) );
+    	System.out.println(exp.eval((Environment<IValue>)env).show());
     } catch (Exception e) {
       System.out.println ("Syntax Error!");
       parser.ReInit(System.in);
@@ -58,15 +59,29 @@ TOKEN :
   |
   < EQUALS: "=">
   |
+  < DESREF : "!" > 
+  |
+  < EQUALEQUAL: "==" >
+  |
   < IN: "in">
   |
   < END: "end">
   |
   < SEMI: ";">
   |
-  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  < IF : "if" >
   |
-  < Num: (["0"-"9"]) + >
+   < WHILE : "while" >
+  |
+  < NEW : "new" >
+  |
+  < TRUE : "true" >
+  |
+  < FALSE : "false" >
+  |
+  < PRINTLN : "println" >
+  |
+  < PRINT : "print" >
   |
   < PLUS : "+" >
   |
@@ -74,13 +89,42 @@ TOKEN :
   |
   < TIMES : "*">
   |
+  < AND : "&&" >
+  |
   < DIV : "/">
   |
   < LPAR : "(" >
   |
   < RPAR : ")" >
   |
+  < OR : "||" >
+  |
   < EL: "\n" >
+  |
+  < ASSIGN : ":=" >
+  |
+  < BOOL: "bool" >
+  | 
+  < ELSE : "else" >
+  |
+  < THEN : "then" >
+  |
+  < DO : "do" >
+  |
+  < NOT : "~" >
+  | 
+  < LEQ : "<=" >
+  |
+  < GEQ : ">=" >
+  |  
+  < LESS : "<" >
+  |
+  < GREATER : ">" >
+  | 
+  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+  |
+  < Num: (["0"-"9"]) + > 
+  
 }
 
 ASTNode Start():
@@ -90,25 +134,22 @@ ASTNode Start():
    { return t; }
 }
 
-ASTNode Exp() :
-{ Token op;
-  ASTNode t1, t2; }
+ASTNode Exp(): //SEMI
+{ ASTNode t1,t2; }
 {
-     t1=Term() ( ( op=<PLUS> | op=<MINUS> ) t2=Term() 
-                 { if (op.kind == PLUS) 
-                         t1 = new ASTPlus(t1,t2);
-                   else  t1 = new ASTMinus(t1,t2);
-                 } 
-               ) *
-     { return t1; } 
+   t1 = Or()
+   (
+     < SEMI > t2=Or()
+     { t1 = new ASTSeq(t1,t2); })*
+   { return t1; }
 }
 
 ASTNode Term() :
 {Token op;
   ASTNode t1, t2;}
 {
-     t1 = Fact() ( ( op=<TIMES> | op=<DIV> ) 
-     
+     t1 = Fact()
+     ((  op=<TIMES> | op=<DIV> ) 
      t2 = Term() 
  	 {
         if(op.kind == TIMES)
@@ -117,7 +158,70 @@ ASTNode Term() :
         	t1 = new ASTDiv(t1, t2);    
                 
      } 
-		) *
+		)*
+     { return t1; } 
+}
+
+ASTNode Or():  
+{Token op; ASTNode t1, t2;}
+{
+  	t1=And()
+	(
+	  op=< OR > t2=And()
+	  { t1 = new ASTOr(t1,t2); } )*
+	{ return t1; }
+}
+
+ASTNode And():
+{Token op; ASTNode t1, t2;}
+{
+  	t1=Not()
+	(
+	  op=< AND > t2=Not()
+	{ t1 = new ASTAnd(t1,t2); } )*
+	{ return t1; }
+}
+
+ASTNode Not():
+{Token op; ASTNode t1;}
+{
+	(
+	  < NOT > t1=Comp() { t1 = new ASTNot(t1); }
+	|  t1 = Comp()
+	)
+	{ return t1; }
+}
+
+ASTNode Comp():
+{Token op; ASTNode t1,t2;}
+{
+  t1=PlusMinus()
+  (
+		op = < LESS > t2 = PlusMinus()  { t1 = new ASTLesser(t1,t2); }
+		|op = < GREATER > t2 = PlusMinus()  { t1 = new ASTGreater(t1,t2); }
+		|op = < LEQ > t2 = PlusMinus()  { t1 = new ASTLesserEqual(t1,t2); }
+		|op = < GEQ > t2 = PlusMinus()  { t1 = new ASTGreaterEqual(t1,t2); }
+		|op = < EQUALEQUAL > t2 = PlusMinus()  { t1 = new ASTEquals(t1,t2); }
+        |op = < ASSIGN > t2 = PlusMinus() { t1 = new ASTAssign(t1,t2); }
+		)*
+
+		{return t1;}
+}
+
+ASTNode PlusMinus() : 
+{ Token op; ASTNode t1, t2;}
+{
+     t1=Term() 
+     ((op=< PLUS > | op=< MINUS >)
+     t2=Term() 
+     
+	     { if (op.kind == PLUS)
+	     		t1 = new ASTPlus(t1,t2);
+	       else
+	       		t1 = new ASTMinus(t1,t2);
+	     }  
+	  )*
+	   
      { return t1; } 
 }
 
@@ -125,18 +229,27 @@ ASTNode Term() :
 ASTNode Fact() :
 { Token n; 
   Token id;
+  ASTNode t2,t3;
   List<PairValues> list = new LinkedList();
   Map<String, ASTNode> mapAux = new LinkedHashMap<String, ASTNode>();
   
   ASTNode t, a, b;}
 {
-   ( n=<Num> { t = new ASTNum(Integer.parseInt(n.image)); } 
+   ( n=<Num> { t = new ASTNum(Integer.parseInt(n.image)); }
+   | < TRUE > { return new ASTBool(true); }
+   | < FALSE > { return new ASTBool(false); }
    | <LPAR> t=Exp() <RPAR> 
    | id = <Id> {t = new ASTId(id.image);}
    |<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));} (<DEF> n = <Id> <EQUALS> a = Exp() {mapAux.put(n.image, a); list.add(new PairValues(n.image, a));})* <IN> b = Exp()<END> <SEMI> { t = new ASTDef(list, b, mapAux);}
+   | < WHILE > t=Exp() < DO > t2=Exp() < END > { t = new ASTWhile(t,t2); }
+   | < IF > t=Exp() < THEN > t2=Exp() < ELSE > t3=Exp() < END > { t = new ASTIf(t,t2,t3); }
+   | < NEW > t=Fact() { t = new ASTNew(t); }
+   | < DESREF > t=Fact() { t = new ASTDesref(t); }
+   | < MINUS >{ t = new ASTUMinus(Fact()); }
+   | < PRINTLN > t=Or() { t = new ASTPrint(t); }
+   | < PRINT > t=Or() { t = new ASTPrint(t); }
+   
+
    )
    { return t; }
 }
-
-
-

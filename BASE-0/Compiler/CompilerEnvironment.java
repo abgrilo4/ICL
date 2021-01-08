@@ -14,7 +14,6 @@ public class CompilerEnvironment {
 		map = new HashMap<String, Integer>();
 	}
 	
-	
 	public CompilerEnvironment beginScope() 
 	{
 		CompilerEnvironment environment = new CompilerEnvironment(this);

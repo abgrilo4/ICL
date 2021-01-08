@@ -1,88 +1,63 @@
 package AST;
 
-import Environment.Environment;
-import Exceptions.WrongTypeException;
-import Types.IType;
-import Values.IValue;
-import Compiler.CompilerEnvironment;
-import Compiler.CodeBlock;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import Compiler.CodeBlock;
+import Compiler.CompilerEnvironment;
+import Environment.Environment;
+import Exceptions.WrongTypeException;
+import Types.IType;
+import Values.IValue;
+
 public class ASTDef implements ASTNode{
 
-	//private List<PairValues> list;
-	private Map<String, ASTNode> mapAux;
+	private Map<String, ASTNode> aux;
+	private List<PairValues> list;
 	private ASTNode body;
-	private IType type;
-    private List<IType> types;
-	private static final String ERROR_TYPECHECK = "Wrong types in def operation";
+
+	public ASTDef(List<PairValues> list, ASTNode body, Map<String, ASTNode> aux)
+	{
+		this.list = list;
+		this.body = body;
+		this.aux = aux;
+	}
 	
-		public IValue eval(Environment<IValue> e) throws WrongTypeException
+	@Override
+	public IValue eval(Environment<IValue> e) throws WrongTypeException {
+		Environment<IValue> newEnvironment = e.beginScope();
+
+		for(PairValues v: list)
 		{
-			Environment<IValue> environment2 = e.beginScope();
-			Set<Entry<String, ASTNode>> set = mapAux.entrySet();
-			
-			
-			for(Entry<String, ASTNode> entry: set)
-			{
-				IValue value = entry.getValue().eval(environment2);
-				environment2.assoc(entry.getKey(), value);
-			}
-			
-			IValue value2 = body.eval(environment2);
-			e = environment2.endScope();
-			return value2;
-		}
-		
-		public ASTDef(Map<String, ASTNode> mapAux, ASTNode body, List<IType> types)
-		{
-			this.mapAux= mapAux;
-			this.body = body;
-			this.types = types;
-		}
-		
-		public void compile(CodeBlock c, CompilerEnvironment env)	
-		{	
-			Set<Entry<String, ASTNode>> set = mapAux.entrySet();
-			CompilerEnvironment newEnvironment = env.beginScope();
-			c.createFrame();
-			c.compileDef(set, newEnvironment);
-			body.compile(c, newEnvironment);
-			c.deleteFrame();
+			IValue value = v.getValue().eval(e);
+			newEnvironment.assoc(v.getKey(), value);
 		}
 
-		@Override
-		public IType typechecker(Environment<IType> environment) throws WrongTypeException {
-			Set<Entry<String, ASTNode>> set = mapAux.entrySet();
-			
-			int counter = 0;
-			
-			for(Entry<String, ASTNode> entry: set) { 
-				IType type1 = entry.getValue().typechecker(environment);
-				IType type2 = types.get(counter);
-				
-				if(!(type1.equals(type2))) {
-					throw new WrongTypeException(ERROR_TYPECHECK);
-				}
-				counter++;
-			}
-			
-			Environment<IType> newEnvironment = environment.beginScope(); 
-
-			counter = 0;
-			for(Entry<String, ASTNode> entry: set) {
-				newEnvironment.assoc(entry.getKey(), types.get(counter));
-				counter++;
-			}
-
-		    type = body.typechecker(newEnvironment); 
-			environment = newEnvironment.endScope();
-		     
-		    return type;   
-		}
+		IValue value2 = body.eval(newEnvironment);
+		newEnvironment.endScope();
+		return value2;
 	}
 
-	
+	@Override
+	public void compile(CodeBlock c, CompilerEnvironment environment) {
+		Set<Entry<String, ASTNode>> set = aux.entrySet();
+		CompilerEnvironment newEnvironment = environment.beginScope();
+		c.createFrame();
+		c.compileDef(set, newEnvironment);
+		body.compile(c, newEnvironment);
+		c.deleteFrame();
+	}
+
+	@Override
+	public IType typechecker(Environment<IType> environment) throws WrongTypeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
+
+
+

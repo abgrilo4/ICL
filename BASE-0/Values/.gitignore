@@ -2,3 +2,6 @@
 /BooleanValue.class
 /IntegerValue.class
 /DefValue.class
+/RefValue.class
+/StringValue.class
+/CellValue.class
